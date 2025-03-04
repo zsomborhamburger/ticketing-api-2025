@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { TicketsService } from './tickets.service';
 import { Prisma } from '@prisma/client';
@@ -25,20 +26,20 @@ export class TicketsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.ticketsService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.ticketsService.findOne(id);
   }
 
   @Patch(':id')
   update(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateTicketDto: Prisma.TicketUncheckedUpdateInput,
   ) {
-    return this.ticketsService.update(+id, updateTicketDto);
+    return this.ticketsService.update(id, updateTicketDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.ticketsService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.ticketsService.remove(id);
   }
 }

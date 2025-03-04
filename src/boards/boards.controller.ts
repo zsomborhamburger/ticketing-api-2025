@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { BoardsService } from './boards.service';
 import { Prisma } from '@prisma/client';
@@ -25,20 +26,20 @@ export class BoardsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.boardsService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.boardsService.findOne(id);
   }
 
   @Patch(':id')
   update(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateBoardDto: Prisma.BoardUpdateInput,
   ) {
-    return this.boardsService.update(+id, updateBoardDto);
+    return this.boardsService.update(id, updateBoardDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.boardsService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.boardsService.remove(id);
   }
 }
