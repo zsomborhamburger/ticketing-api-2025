@@ -1,26 +1,67 @@
-import { Injectable } from '@nestjs/common';
-import { CreateBoardDto } from './dto/create-board.dto';
-import { UpdateBoardDto } from './dto/update-board.dto';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { PrismaService } from 'nestjs-prisma';
+import { Board, Prisma } from '@prisma/client';
 
 @Injectable()
 export class BoardsService {
-  create(createBoardDto: CreateBoardDto) {
-    return 'This action adds a new board';
+  constructor(private readonly prisma: PrismaService) {}
+
+  async create(createBoardDto: Prisma.BoardCreateInput): Promise<Board> {
+    try {
+      return await this.prisma.board.create({
+        data: createBoardDto,
+      });
+    } catch (e) {
+      if (e instanceof Prisma.PrismaClientKnownRequestError) {
+        throw new BadRequestException(e.message);
+      } else if (e instanceof Prisma.PrismaClientValidationError) {
+        throw new BadRequestException(e.message);
+      }
+      throw new BadRequestException('Failed to create board');
+    }
   }
 
-  findAll() {
-    return `This action returns all boards`;
+  async findAll(): Promise<Board[]> {
+    return await this.prisma.board.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} board`;
+  async findOne(id: number): Promise<Board> {
+    const board = await this.prisma.board.findUnique({
+      where: { id },
+    });
+    if (!board) {
+      throw new NotFoundException(`Board with ID ${id} not found`);
+    }
+    return board;
   }
 
-  update(id: number, updateBoardDto: UpdateBoardDto) {
-    return `This action updates a #${id} board`;
+  async update(
+    id: number,
+    updateBoardDto: Prisma.BoardUpdateInput,
+  ): Promise<Board> {
+    try {
+      return await this.prisma.board.update({
+        where: { id },
+        data: updateBoardDto,
+      });
+    } catch (e) {
+      console.error(e);
+      throw new NotFoundException(`Board with ID ${id} not found`);
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} board`;
+  async remove(id: number): Promise<Board> {
+    try {
+      return await this.prisma.board.delete({
+        where: { id },
+      });
+    } catch (e) {
+      console.error(e);
+      throw new NotFoundException(`Board with ID ${id} not found`);
+    }
   }
 }
