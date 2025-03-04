@@ -1,26 +1,65 @@
-import { Injectable } from '@nestjs/common';
-import { CreateTicketDto } from './dto/create-ticket.dto';
-import { UpdateTicketDto } from './dto/update-ticket.dto';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { PrismaService } from 'nestjs-prisma';
+import { Prisma, Ticket } from '@prisma/client';
 
 @Injectable()
 export class TicketsService {
-  create(createTicketDto: CreateTicketDto) {
-    return 'This action adds a new ticket';
+  constructor(private readonly prisma: PrismaService) {}
+
+  async create(
+    createTicketDto: Prisma.TicketUncheckedCreateInput,
+  ): Promise<Ticket> {
+    try {
+      return await this.prisma.ticket.create({
+        data: createTicketDto,
+      });
+    } catch (e) {
+      console.error(e);
+      throw new BadRequestException('Could not create ticket');
+    }
   }
 
-  findAll() {
-    return `This action returns all tickets`;
+  async findAll(): Promise<Ticket[]> {
+    return await this.prisma.ticket.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} ticket`;
+  async findOne(id: number): Promise<Ticket> {
+    const ticket = await this.prisma.ticket.findUnique({
+      where: { id },
+    });
+    if (!ticket) {
+      throw new NotFoundException('Could not find ticket');
+    }
+    return ticket;
   }
 
-  update(id: number, updateTicketDto: UpdateTicketDto) {
-    return `This action updates a #${id} ticket`;
+  async update(
+    id: number,
+    updateTicketDto: Prisma.TicketUncheckedUpdateInput,
+  ): Promise<Ticket> {
+    try {
+      return await this.prisma.ticket.update({
+        where: { id },
+        data: updateTicketDto,
+      });
+    } catch (e) {
+      console.error(e);
+      throw new BadRequestException(`Could not update ticket with id ${id}`);
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} ticket`;
+  async remove(id: number): Promise<Ticket> {
+    try {
+      return await this.prisma.ticket.delete({
+        where: { id },
+      });
+    } catch (e) {
+      console.error(e);
+      throw new BadRequestException(`Could not delete ticket with id ${id}`);
+    }
   }
 }

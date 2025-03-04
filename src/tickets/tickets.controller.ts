@@ -8,15 +8,14 @@ import {
   Delete,
 } from '@nestjs/common';
 import { TicketsService } from './tickets.service';
-import { CreateTicketDto } from './dto/create-ticket.dto';
-import { UpdateTicketDto } from './dto/update-ticket.dto';
+import { Prisma } from '@prisma/client';
 
 @Controller('tickets')
 export class TicketsController {
   constructor(private readonly ticketsService: TicketsService) {}
 
   @Post()
-  create(@Body() createTicketDto: CreateTicketDto) {
+  create(@Body() createTicketDto: Prisma.TicketUncheckedCreateInput) {
     return this.ticketsService.create(createTicketDto);
   }
 
@@ -31,7 +30,10 @@ export class TicketsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTicketDto: UpdateTicketDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateTicketDto: Prisma.TicketUncheckedUpdateInput,
+  ) {
     return this.ticketsService.update(+id, updateTicketDto);
   }
 
